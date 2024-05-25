@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AAO_App.Data;
 using AAO_App.Models;
+using System.IO;
+using AAO_App.ModelView;
+using Microsoft.AspNetCore.Http;
 //using BC = BCrypt.Net.BCrypt;
 
 namespace AAO_App.Controllers
@@ -23,8 +26,8 @@ namespace AAO_App.Controllers
         // GET: DriverTest/Create
         public IActionResult Index()
         {
-            ViewData["CityId"] = new SelectList(_context.Cities, "CityId", "CityId");
-            ViewData["CityName"] = new SelectList(_context.Cities, "CityName", "CityName");
+            
+            ViewData["CityName"] = new SelectList(_context.Cities, "CityId", "CityName");
             return View();
         }
 
@@ -33,19 +36,57 @@ namespace AAO_App.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index([Bind("DriverId,CityId,Firstname,Lastname,Address,Phone,Location,Birthday,Password,IsValidated,ProfileImage")] Driver driver)
+        public async Task<IActionResult> Index( DriverViewModel model)
         {
+            Driver obj = new Driver();
             if (ModelState.IsValid)
             {
-
+                
+                if (model.file != null && model.file.Length > 0)
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        model.file.CopyTo(ms);
+                        obj.ProfileImage = ms.ToArray();
+                    }
+                }
+                obj.DriverId = model.DriverId;
+                obj.CityId = model.CityId;
+                obj.Address = model.Address;
+                obj.Birthday = model.Birthday;
+                obj.Cities = model.Cities;
+                obj.Firstname = model.Firstname;
+                obj.IsValidated = model.IsValidated;
+                obj.Lastname = model.Lastname;
+                obj.Location = model.Location;
+                obj.Password = model.Password;
+                obj.Phone = model.Phone; 
                 //driver.Password = BC.HashPassword(driver.Password); Some day my sweet prince some day
-                _context.Add(driver);
+                _context.Add(obj);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (obj.DriverId>0) // Klam måde at tjekke login på, bør omskrives.. eventually.. Kraftedeme en bootleg måde jeg fandt her
+                {
+
+                    // HttpContext.Session.SetString("Address", driver[0].Address);
+                    //HttpContext.Session.SetString("Birthday", driver[0].Birthday.ToString());
+                    // HttpContext.Session.SetString("CityId", driver[0].CityId.ToString());
+                    HttpContext.Session.SetString("DriverId", obj.DriverId.ToString());
+                    HttpContext.Session.SetString("Firstname", obj.Firstname);
+                    HttpContext.Session.SetString("Lastname", obj.Lastname);
+                    HttpContext.Session.SetString("CityId", obj.CityId.ToString());
+
+
+                    //HttpContext.Session.SetString("Location", driver[0].Location);
+                    //HttpContext.Session.SetString("Phone", driver[0].Phone);
+
+                    //return View("~/Views/Homepage/Index");
+                    
+                }
+                return RedirectToAction("Index", "Home");
             }
-            ViewData["CityId"] = new SelectList(_context.Cities, "CityId", "CityId", driver.CityId);
-            ViewData["CityName"] = new SelectList(_context.Cities, nameof(City.CityId), nameof(City.CityName), driver.CityId);
-            return View(driver);
+            
+            ViewData["CityName"] = new SelectList(_context.Cities, nameof(City.CityId), nameof(City.CityName), obj.CityId);
+            return View(model);
         }
 
         private bool DriverExists(int id)

@@ -10,8 +10,24 @@
 <script src="/js/TripJs.js" defer></script>
 <script src="https://kit.fontawesome.com/f8c369dae8.js" crossorigin="anonymous"></script>
 
-
+@section Scripts{
+    <script>
+        function popOut() {
+            var src = document.getElementById('iframeid').src;
+            window.open(src);
+        }
+    </script>
+    
+}
 <h1>Ture</h1>
+
+<p style="display:none">
+    <iframe id="iframeid"
+            width="450"
+            height="250"
+            style="border:0"
+            src="https://www.google.com/maps/embed?api=1&origin=Space+Needle+Seattle+WA&destination=Pike+Place+Market+Seattle+WA&travelmode=bicycling"></iframe>
+</p>
 
 <div class="MenuTripContainer">
     <div onclick="MyTrip()" class="Item MenuTripItem1" id="TripItem1">
@@ -60,44 +76,52 @@
 </div>
 
 
-@foreach (var item in Model)
+@foreach (var item in ViewBag.AvailableTrip as List<AAO_App.Models.TripModelView>)
 {
     int thisUserId = Int32.Parse(Context.Session.GetString("DriverId"));
-    if (thisUserId != item.DriverId)
+    if (!Model.Any(i=>i.TripId==item.TripId))
     {
-<div id="NewTrips" class="NewTrips AllNewTrips" style="display:flex">
-    <div class="TripsHolder">
-        <div id="Date" class="Date">
-            <p class="Number">@item.DateStart.Day</p>
-            <p id="Month" class="Month">@item.DateStart.Month</p>
-        </div>
-        <div class="Info">
-            <p class="StartPoint">Afgangsted: @item.CityName</p>
-            <p>Start @item.DateStart</p>
-            <p>Slut @item.DateEnd</p>
-        </div>
-        <div class="Time">
-            <p>@Html.DisplayFor(modelItem => (item.DateEnd - item.DateStart).TotalHours) t</p>
-        </div>
-        <div id="Country" class="Country">
-            <p class="CType">@item.CountryCode - @item.CountryCode</p>
-        </div>
-    </div>
-    <div id="Info" class="MoreInfo" style="display:none">
-        <div class="TripInformation">
-            <p><span style="text-decoration:underline">Din tur går til:</span> @item.TripInfo</p>
-            <p><span style="text-decoration:underline">Besked:</span> @item.MessageContents</p>
-            <p><span style="text-decoration:underline">Kontakt person:</span> @item.Firstname @item.Lastname</p>
-            <p><span style="text-decoration:underline">Afdeling:</span> @item.DepartmentName</p>
-        </div>
+        <div id="NewTrips" class="NewTrips AllNewTrips" style="display:block">
+            @using (Html.BeginForm("acceptTrip", "Trip", FormMethod.Post))
+            {
+                <input id="id" name="id" value="@item.TripId" type="hidden" />
+                <div class="TripsHolder">
+                    <div id="Date" class="Date">
+                        <p class="Number">@item.DateStart.Day</p>
+                        <p id="Month" class="Month">@item.DateStart.Month</p>
+                    </div>
+                    <div class="Info">
+                        <p class="StartPoint">Afgangsted: @item.CityName</p>
+                        <p>Start @item.DateStart</p>
+                        <p>Slut @item.DateEnd</p>
+                    </div>
+                    <div class="Time">
+                        <p>@Html.DisplayFor(modelItem => (item.DateEnd - item.DateStart).TotalHours) t</p>
+                    </div>
+                    <div id="Country" class="Country">
+                        <p class="CType">@item.CountryCode - @item.CountryCode</p>
+                    </div>
+                </div>
+                <div id="Info" class="MoreInfo" style="display:none">
+                    <div class="TripInformation">
+                        <p><span style="text-decoration:underline">Din tur går til:</span> @item.TripInfo</p>
+                        <p><span style="text-decoration:underline">Besked:</span> @item.MessageContents</p>
+                        <p><span style="text-decoration:underline">Kontakt person:</span> @item.Firstname @item.Lastname</p>
+                        <p><span style="text-decoration:underline">Afdeling:</span> @item.DepartmentName</p>
+                        <button type="button" onclick="popOut()">
+                            Find Location
+                        </button>
+                    </div>
 
-        <div class="Contact">
-            <p><i class="fas fa-phone-alt"></i> @item.Phone</p>
-            <p><i class="fas fa-envelope"></i> @item.Email</p>
-        </div>
-        <button class="Btn">Anmod om tur</button>
+                    <div class="Contact">
+                        <p><i class="fas fa-phone-alt"></i> @item.Phone</p>
+                        <p><i class="fas fa-envelope"></i> @item.Email</p>
+                    </div>
+                    <button type="submit" class="Btn">Anmod om tur</button>
+                </div>
+            }
+
     </div>
-</div>
     }
 
 }
@@ -109,41 +133,50 @@
     if (thisUserId == item.DriverId)
     {
         <div id="NewTrips" class="NewTrips MyTrips" style="display:none">
-            <div class="TripsHolder">
-                <div id="Date" class="Date">
-                    <div class="Request"> </div>
-                    <p class="RequestText">Afventer <br /> svar</p>
-                    <p class="Number">@item.DateStart.Day</p>
-                    <p id="Month" class="Month">@item.DateStart.Month</p>
+        @using (Html.BeginForm("Index", "Trip", FormMethod.Post))
+        {
+            <input id="id" name="id" value="@item.DriverHasTripId" type="hidden" />
+                <div class="TripsHolder">
+                    <div id="Date" class="Date">
+                        <div class="Request"> </div>
+                        <p class="RequestText">Afventer <br /> svar</p>
+                        <p class="Number">@item.DateStart.Day</p>
+                        <p id="Month" class="Month">@item.DateStart.Month</p>
+                    </div>
+                    <div class="Info">
+                        <p class="StartPoint">Afgangsted: @item.CityName</p>
+                        <p>Start @item.DateStart</p>
+                        <p>Slut @item.DateEnd</p>
+                    </div>
+                    <div class="Time">
+                        <p>@Html.DisplayFor(modelItem => (item.DateEnd - item.DateStart).TotalHours) t</p>
+                    </div>
+                    <div id="Country" class="Country">
+                        <p class="CType">@item.CountryCode - @item.CountryCode</p>
+                    </div>
                 </div>
-                <div class="Info">
-                    <p class="StartPoint">Afgangsted: @item.CityName</p>
-                    <p>Start @item.DateStart</p>
-                    <p>Slut @item.DateEnd</p>
-                </div>
-                <div class="Time">
-                    <p>@Html.DisplayFor(modelItem => (item.DateEnd - item.DateStart).TotalHours) t</p>
-                </div>
-                <div id="Country" class="Country">
-                    <p class="CType">@item.CountryCode - @item.CountryCode</p>
-                </div>
-            </div>
-            <div id="Info" class="MoreInfo" style="display:none">
-                <div class="TripInformation">
-                    <p><span style="text-decoration:underline">Din tur går til:</span> @item.TripInfo</p>
-                    <p><span style="text-decoration:underline">Besked:</span> @item.MessageContents</p>
-                    <p><span style="text-decoration:underline">Kontakt person:</span> @item.Firstname @item.Lastname</p>
-                    <p><span style="text-decoration:underline">Afdeling:</span> @item.DepartmentName</p>
-                </div>
+                <div id="Info" class="MoreInfo" style="display:none">
+                    <div class="TripInformation">
+                        <p><span style="text-decoration:underline">Din tur går til:</span> @item.TripInfo</p>
+                        <p><span style="text-decoration:underline">Besked:</span> @item.MessageContents</p>
+                        <p><span style="text-decoration:underline">Kontakt person:</span> @item.Firstname @item.Lastname</p>
+                        <p><span style="text-decoration:underline">Afdeling:</span> @item.DepartmentName</p>
+                        <button type="button" onclick="popOut()">
+                            Find Location
+                        </button>
+                    </div>
 
-                <div class="Contact">
-                    <p><i class="fas fa-phone-alt"></i> @item.Phone</p>
-                    <p><i class="fas fa-envelope"></i> @item.Email</p>
+                    <div class="Contact">
+                        <p><i class="fas fa-phone-alt"></i> @item.Phone</p>
+                        <p><i class="fas fa-envelope"></i> @item.Email</p>
+
+                    </div>
+
+                    <button class="Btn" type="submit" style="background-color:red">Afmeld tur</button>
                 </div>
-                <button class="Btn">Anmod om tur</button>
-            </div>
+        }
         </div>
-
+        
     }
 
 }

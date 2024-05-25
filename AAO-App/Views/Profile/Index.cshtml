@@ -1,19 +1,19 @@
-﻿@model IEnumerable<AAO_App.Models.Driver>
+﻿@model AAO_App.Models.Driver
 
 @{
     ViewData["Title"] = "Profile";
     Layout = "~/Views/Shared/_Master.cshtml";
+    var item = Model;
 }
 
 <link href="~/css/Profile.css" rel="stylesheet" type="text/css" />
 
 
 <h1 id="Profil">Profil</h1>
-<div class="wrap_around">
-    <img id="UserPic" src="../../../images/userpic.svg" alt="ProfilePic" />
+<div class="wrap_around" style="display: inline-block; width: 112px; position: relative; left: 46%;">
+    <img id="UserPic" src="@string.Format("data:image/jpg;base64,{0}",Convert.ToBase64String(item.ProfileImage))" alt="ProfilePic" style="width: 100%; border-radius: 50%; border: 2px solid #000;" />
 </div>
-@foreach (var item in Model)
-{
+ 
     <div id="TextBody">
         <div class="wrap_around">
             <h2 class="ProfileSpace" id="Stamdata">Stamdata</h2>
@@ -35,7 +35,7 @@
         <div class="ProfileSpace" id="ProfLokation"> Type: National</div>
     </div>
         
-}
+ 
 
 
 

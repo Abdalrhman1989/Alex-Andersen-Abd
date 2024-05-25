@@ -1,13 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using AAO_App.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace AAO_App.Models
+namespace AAO_App.ModelView
 {
-    public class Driver
+    public class DriverViewModel
     {
-
-        [Key]
         public int DriverId { get; set; }
         public int CityId { get; set; }
         public City Cities { get; set; }
@@ -24,7 +23,7 @@ namespace AAO_App.Models
         public DateTime Birthday { get; set; }
         public string Password { get; set; }
         public int IsValidated { get; set; }
-        public Byte[] ProfileImage { get; set; }
-        //public IFormFile file { get; set; }
+        [Required]
+        public IFormFile file { get; set; }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AAO_App.Data;
 using AAO_App.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace AAO_App
 {
@@ -21,7 +22,7 @@ namespace AAO_App
 
         public ActionResult Index(TripModelView model) 
         {
-
+            int thisUserId = Int32.Parse(HttpContext.Session.GetString("DriverId"));
             var TripModelData =  (from t in _db.Trips
                        join e in _db.Employees
                        on t.EmployeeId equals e.EmployeeId
@@ -37,7 +38,7 @@ namespace AAO_App
                        on t.TripId equals dt.TripId
                        join dr in _db.Drivers
                        on dt.DriverId equals dr.DriverId
-                                       
+                            where dt.DriverId==thisUserId
 
                        select new TripModelView
                        {
@@ -54,18 +55,77 @@ namespace AAO_App
                            CityName = ci.CityName,
                            CountryCode = co.CountryCode,
                            DriverId = dr.DriverId,
-                           RequestStatus = dt.RequestStatus
-
+                           RequestStatus = dt.RequestStatus,
+                           DriverHasTripId=dt.DriverHasTripId
                        }).ToList();
-            
+
+            ViewBag.AvailableTrip = (from t in _db.Trips
+                                 join e in _db.Employees
+                                 on t.EmployeeId equals e.EmployeeId
+                                 join de in _db.DepartmentHasEmployees
+                                 on t.EmployeeId equals de.DepartmentHasEmployeesId
+                                 join d in _db.Departments
+                                 on de.DepartmentHasEmployeesId equals d.DepId
+                                 join ci in _db.Cities
+                                 on t.CityId equals ci.CityId
+                                 join co in _db.Countries
+                                 on ci.CountryId equals co.CountryId
+                                    
+
+                                 select new TripModelView
+                                 {
+                                     TripId = t.TripId,
+                                     DateStart = t.DateStart,
+                                     DateEnd = t.DateEnd,
+                                     MessageContents = t.MessageContents,
+                                     TripInfo = t.TripInfo,
+                                     Firstname = e.Firstname,
+                                     Lastname = e.Lastname,
+                                     Email = e.Email,
+                                     Phone = e.Phone,
+                                     DepartmentName = d.DepartmentName,
+                                     CityName = ci.CityName,
+                                     CountryCode = co.CountryCode
+                                    
+                                 }).ToList();
 
             return View(TripModelData);
 
         }
+        
+        [HttpPost]
+        public ActionResult Index(int id)
+        {
+
+            var driverHasTrip = _db.DriverHasTrips.Find(id);
+            if (driverHasTrip is not null)
+            {
+                _db.DriverHasTrips.Remove(driverHasTrip);
+                _db.SaveChanges();
+            }
+            
+            return RedirectToAction(nameof(Index));
+
+        }
+
+        [HttpPost]
+        public ActionResult acceptTrip(int id)
+        {
+            int thisUserId = Int32.Parse(HttpContext.Session.GetString("DriverId"));
+            DriverHasTrip driverHasTrip = new DriverHasTrip
+            {
+                DriverId = thisUserId,
+                TripId = id
+            };
+            _db.DriverHasTrips.Add(driverHasTrip);
+            _db.SaveChanges();
+            
+
+            return RedirectToAction(nameof(Index));
+
+        }
 
 
-        /*
-       
 
         /*
         DETTE VIRKER!! 

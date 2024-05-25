@@ -6,7 +6,7 @@ function OpenCloseFilter() {
     //var test = document.getElementById("test").addEventListener('click', OpenCloseFilter())
 
     if (filter.style.display == "none") {
-        filter.style.display = "flex";
+        filter.style.display = "block";
     }
 
     else {
@@ -33,7 +33,7 @@ function ShowTrips() {
         }
 
         else {
-            AllTrips[e].style.display = "flex";
+            AllTrips[e].style.display = "block";
         }
         
     }
@@ -41,7 +41,7 @@ function ShowTrips() {
     for (let e = 0; e < MyTrips.length; e++) {
 
         if (document.getElementById("TripItem1").style.height == "46px") {
-            MyTrips[e].style.display = "flex";
+            MyTrips[e].style.display = "block";
         }
 
         else {

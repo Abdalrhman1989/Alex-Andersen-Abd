@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using AAO_App.Data;
 using AAO_App.Models;
 using Microsoft.AspNetCore.Http;
+using AAO_App.ModelView;
+using System.IO;
 
 namespace AAO_App
 {
@@ -25,10 +27,21 @@ namespace AAO_App
         // GET: DriverTest
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _db.Drivers.Include(d => d.Cities).Where(m => m.DriverId == int.Parse(this.HttpContext.Session.GetString("DriverId")));
-            return View(await applicationDbContext.ToListAsync());
+            var applicationDbContext =await _db.Drivers.Include(d => d.Cities).Where(m => m.DriverId == int.Parse(this.HttpContext.Session.GetString("DriverId"))).FirstOrDefaultAsync();
+
+            
+            return View(applicationDbContext);
         }
 
+        public byte[] GetImage(string sbase64sring)
+        {
+            byte[] bytes = null;
+            if (!string.IsNullOrEmpty(sbase64sring))
+            {
+                bytes= Convert.FromBase64String(sbase64sring);
+            }
+            return bytes;
+        }
         ////GET: DriverTest/Details/5
         //public async Task<IActionResult> Details(int? id)
         //{
@@ -56,13 +69,26 @@ namespace AAO_App
                 return NotFound();
             }
 
-            var driver = await _db.Drivers.FindAsync(id);
-            if (driver == null)
+            var model = await _db.Drivers.FindAsync(id);
+            if (model == null)
             {
                 return NotFound();
             }
-          //  ViewData["CityId"] = new SelectList(_db.Cities, "CityId", "CityId", driver.CityId);
-            return View(driver);
+            DriverViewModel obj = new DriverViewModel();
+            
+            obj.DriverId = model.DriverId;
+            obj.CityId = model.CityId;
+            obj.Address = model.Address;
+            obj.Birthday = model.Birthday;
+            obj.Cities = model.Cities;
+            obj.Firstname = model.Firstname;
+            obj.IsValidated = model.IsValidated;
+            obj.Lastname = model.Lastname;
+            obj.Location = model.Location;
+            obj.Password = model.Password;
+            obj.Phone = model.Phone;
+            //  ViewData["CityId"] = new SelectList(_db.Cities, "CityId", "CityId", driver.CityId);
+            return View(obj);
         }
 
         // POST: DriverTest/Edit/5
@@ -70,23 +96,44 @@ namespace AAO_App
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("DriverId,Firstname,Lastname,Address,Phone,Location,Birthday,Password,IsValidated,ProfileImage")] Driver driver)
+        public async Task<IActionResult> Edit(int id, DriverViewModel model)
         {
          
 
             if (ModelState.IsValid)
             {
+                Driver obj = new Driver();
                 try
                 {
-                    driver.DriverId = id;
-                    driver.DriverId = int.Parse(this.HttpContext.Session.GetString("DriverId"));
-                    driver.CityId = int.Parse(this.HttpContext.Session.GetString("CityId"));
-                    _db.Update(driver);
+                    if (model.file != null && model.file.Length > 0)
+                    {
+                        using (var ms = new MemoryStream())
+                        {
+                            model.file.CopyTo(ms);
+                            obj.ProfileImage = ms.ToArray();
+                        }
+                    }
+                     
+                    obj.CityId = model.CityId;
+                    obj.Address = model.Address;
+                    obj.Birthday = model.Birthday;
+                    obj.Cities = model.Cities;
+                    obj.Firstname = model.Firstname;
+                    obj.IsValidated = model.IsValidated;
+                    obj.Lastname = model.Lastname;
+                    obj.Location = model.Location;
+                    obj.Password = model.Password;
+                    obj.Phone = model.Phone;
+
+                    obj.DriverId = id;
+                    obj.DriverId = int.Parse(this.HttpContext.Session.GetString("DriverId"));
+                    obj.CityId = int.Parse(this.HttpContext.Session.GetString("CityId"));
+                    _db.Update(obj);
                     await _db.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DriverExists(driver.DriverId))
+                    if (!DriverExists(obj.DriverId))
                     {
                         return NotFound();
                     }
@@ -98,7 +145,7 @@ namespace AAO_App
                 return RedirectToAction(nameof(Index));
             }
             //ViewData["CityId"] = new SelectList(_db.Cities, "CityId", "CityId", driver.CityId);
-            return View(driver);
+            return View(model);
         }
 
         // GET: DriverTest/Delete/5

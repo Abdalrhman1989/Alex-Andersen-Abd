@@ -33,6 +33,9 @@ namespace AAO_App.Models
 
         //Fra DriverHasTrip
         public int RequestStatus { get; set; }
+        public int DriverHasTripId { get; set; }
+
+        public byte[] profileImage { get; set; }
 
     }
 }

@@ -22,24 +22,12 @@ namespace AAO_App.Controllers
         }
         public IActionResult Index()
         {
+            var deriverId = HttpContext.Session.GetString("DriverId");
+            ViewBag.driverid = deriverId;
             return View();
         }
 
-        // GET: Settings/Delete/1
-        public async Task<IActionResult> Delete(int? id)
-        {
-
-            var driver = await _context.Drivers
-                .Include(d => d.Cities)
-                .FirstOrDefaultAsync(m => m.DriverId == id);
-            if (driver == null)
-            {
-                return NotFound();
-            }
-
-            return View(driver);
-
-        }
+       
 
         // POST: Settings/Delete/1
         [HttpPost, ActionName("Delete")]
@@ -52,6 +40,13 @@ namespace AAO_App.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<JsonResult> DeleteDriverAsync(int id)
+        {
+            var driver = await _context.Drivers.FindAsync(id);
+            _context.Drivers.Remove(driver);
+            await _context.SaveChangesAsync();
+            return Json(true);
+        }
         private bool DriverExists(int id)
         {
             return _context.Drivers.Any(e => e.DriverId == id);

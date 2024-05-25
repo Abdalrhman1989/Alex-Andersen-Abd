@@ -49,26 +49,32 @@
         @RenderBody()
     </main>
     @*Master Footer*@
-    <footer>
-        <div class="footer_item">
-            <a class="footer_wrap" asp-controller="Profile" asp-action="Index">
-                <i class="material-icons" style="font-size:24px;color:white">account_circle</i>
-                <span>Profil</span>
-            </a>
-        </div>
-        <div class="footer_item">
-            <a class="footer_wrap" asp-controller="Notification" asp-action="Index">
-                <i class="material-icons" style="font-size:24px;color:white">notifications</i>
-                <span>Notifikation</span>
-            </a>
-        </div>
-        <div class="footer_item">
-            <a class="footer_wrap" asp-controller="Settings" asp-action="Index">
-                <i class="material-icons" style="font-size:24px;color:white">settings</i>
-                <span>Indstillinger</span>
-            </a>
-        </div>
-    </footer>
+<footer>
+    <div class="footer_item">
+        <a class="footer_wrap" asp-controller="Profile" asp-action="Index">
+            <i class="material-icons" style="font-size:24px;color:white">account_circle</i>
+            <span>Profil</span>
+        </a>
+    </div>
+    <div class="footer_item">
+        <a class="footer_wrap" asp-controller="Trip" asp-action="Index">
+            <i class="material-icons" style="font-size:24px;color:white">local_shipping </i>
+            <span>Tur</span>
+        </a>
+    </div>
+    <div class="footer_item">
+        <a class="footer_wrap" asp-controller="Notification" asp-action="Index">
+            <i class="material-icons" style="font-size:24px;color:white">notifications</i>
+            <span>Notifikation</span>
+        </a>
+    </div>
+    <div class="footer_item">
+        <a class="footer_wrap" asp-controller="Settings" asp-action="Index">
+            <i class="material-icons" style="font-size:24px;color:white">settings</i>
+            <span>Indstillinger</span>
+        </a>
+    </div>
+</footer>
 
     <script asp-append-version="true">
         //Menu Javascript here
